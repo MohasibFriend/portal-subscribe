@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>صفحة الاشتراك</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0; padding: 20px;
+      direction: rtl;
+    }
+    .plan-selection {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .plan-selection button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: 2px solid #007bff;
+      background: #fff;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .plan-selection button.selected {
+      background: #007bff;
+      color: #fff;
+    }
+    #features-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .feature-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      width: 300px;
+      margin: 0 10px;
+      text-align: center;
+    }
+    .feature-card h3 {
+      margin-top: 0;
+    }
+    #form-container {
+      display: none;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      width: 320px;
+      margin: 0 auto;
+    }
+    .form-group {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .form-group input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #additional-emails-container .email-entry {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    #additional-emails-container .email-entry input {
+      flex: 1;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #add-email-btn {
+      display: inline-block;
+      margin-bottom: 15px;
+      padding: 8px 12px;
+      border: 1px solid #28a745;
+      background: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #confirm-btn {
+      width: 100%;
+      padding: 10px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- اختيار الاشتراك -->
+  <div class="plan-selection">
+    <button data-plan="monthly">اشتراك شهري</button>
+    <button data-plan="yearly">اشتراك سنوي</button>
+  </div>
+
+  <!-- عرض المميزات -->
+  <div id="features-container">
+    <!-- يُعبَّأ ديناميكيًا -->
+  </div>
+
+  <!-- نموذج البيانات -->
+  <div id="form-container">
+    <div class="form-group">
+      <label>رقم التلفون:</label>
+      <input type="tel" id="phone-input" placeholder="010XXXXXXX">
+    </div>
+    <div class="form-group">
+      <label>إيميل البوّرتال:</label>
+      <input type="email" id="primary-email-input" placeholder="you@example.com">
+    </div>
+    <button type="button" id="add-email-btn">إضافة إيميل هدية</button>
+    <div id="additional-emails-container"></div>
+    <button type="button" id="confirm-btn">تأكيد</button>
+  </div>
+
+  <script>
+    const featuresContainer = document.getElementById('features-container');
+    const formContainer     = document.getElementById('form-container');
+    let selectedPlan = null;
+    let maxEmails    = 0;
+
+    // بيانات المميزات والأسعار
+    const plans = {
+      monthly: {
+        title: 'اشتراك شهري',
+        features: ['10 إيميلات هدية', 'تحميل سريع'],
+        price: 100
+      },
+      yearly: {
+        title: 'اشتراك سنوي',
+        features: ['20 إيميل هدية', 'تحميل أسرع', 'سعر أرخص مقارنة بالشهر'],
+        price: 700
+      }
+    };
+
+    // عند اختيار الخطة
+    document.querySelectorAll('.plan-selection button').forEach(btn => {
+      btn.addEventListener('click', () => selectPlan(btn.dataset.plan));
+    });
+
+    function selectPlan(plan) {
+      selectedPlan = plan;
+      document.querySelectorAll('.plan-selection button').forEach(b => {
+        b.classList.toggle('selected', b.dataset.plan === plan);
+      });
+      renderFeatures(plan);
+      resetForm(plan);
+      formContainer.style.display = 'block';
+    }
+
+    // عرض بطاقة المميزات
+    function renderFeatures(plan) {
+      const data = plans[plan];
+      // حساب التوفير الشهري للاشتراك السنوي
+      let savingsHtml = '';
+      if (plan === 'yearly') {
+        const monthlyEquiv = (data.price / 12).toFixed(2);
+        const saveAmt = (plans.monthly.price - monthlyEquiv).toFixed(2);
+        savingsHtml = `<p>يعادل حوالي ${monthlyEquiv} جنيه/شهر، موفّر ${saveAmt} جنيه كل شهر.</p>`;
+      }
+      featuresContainer.innerHTML = `
+        <div class="feature-card">
+          <h3>${data.title}</h3>
+          <ul>
+            ${data.features.map(f => `<li>• ${f}</li>`).join('')}
+          </ul>
+          <p>السعر: ${data.price} جنيه</p>
+          ${savingsHtml}
+        </div>
+      `;
+    }
+
+    // تهيئة النموذج لكل خطة
+    function resetForm(plan) {
+      maxEmails = plan === 'yearly' ? 20 : 10;
+      document.getElementById('additional-emails-container').innerHTML = '';
+    }
+
+    // إضافة حقل إيميل
+    document.getElementById('add-email-btn').addEventListener('click', () => {
+      const container = document.getElementById('additional-emails-container');
+      const count = container.querySelectorAll('.email-entry').length;
+      if (count >= maxEmails) {
+        alert(`الحد الأقصى للإيميلات: ${maxEmails}`);
+        return;
+      }
+      const entry = document.createElement('div');
+      entry.className = 'email-entry';
+      entry.innerHTML = `
+        <input type="email" placeholder="هدية إيميل ${count + 1}">
+        <button type="button" class="remove-email">–</button>
+      `;
+      container.appendChild(entry);
+    });
+
+    // إزالة حقل إيميل عند الضغط على زر الحذف
+    document.getElementById('additional-emails-container').addEventListener('click', e => {
+      if (e.target.classList.contains('remove-email')) {
+        e.target.parentElement.remove();
+      }
+    });
+
+    // تأكيد وإرسال البيانات
+    document.getElementById('confirm-btn').addEventListener('click', async () => {
+      const phone = document.getElementById('phone-input').value.trim();
+      const email = document.getElementById('primary-email-input').value.trim();
+      if (!phone || !email || !selectedPlan) {
+        alert('يرجى ملء رقم التلفون، الإيميل، واختيار الخطة.');
+        return;
+      }
+      const additional = Array.from(
+        document.querySelectorAll('#additional-emails-container .email-entry input')
+      ).map(i => i.value.trim()).filter(v => v);
+
+      try {
+        const resp = await fetch(
+          'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-extintion',
+          {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+              email: email,
+              phone: phone,
+              plan: selectedPlan,
+              additionalEmails: additional
+            })
+          }
+        );
+        if (!resp.ok) {
+          throw new Error(`خطأ في الإرسال: ${resp.status}`);
+        }
+        // بعد التأكيد، اعادة التوجيه
+        window.location.href = 'https://invoicing.eta.gov.eg/documents';
+      } catch (err) {
+        alert('حدث خطأ أثناء الإرسال: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
