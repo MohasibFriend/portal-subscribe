@@ -83,7 +83,6 @@
       padding: 20px;
       width: 100%;
       max-width: 500px;
-      position: relative;
     }
     .input-group {
       display: flex;
@@ -135,57 +134,52 @@
       background: #3498db;
       color: white;
     }
-    /* spinner */
-    .spinner-overlay {
+
+    /* Overlay common */
+    .overlay {
       display: none;
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0, 0, 0, 0.5);
       align-items: center;
       justify-content: center;
       z-index: 1000;
     }
+    /* Spinner */
     .spinner {
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid #3498db;
+      width: 60px; height: 60px;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
       border-radius: 50%;
-      width: 60px;
-      height: 60px;
       animation: spin 1s linear infinite;
     }
     @keyframes spin {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
-    /* result containers */
-    .result-container {
-      display: none;
-      flex-direction: column;
-      align-items: center;
+    /* Message box */
+    .message-box {
       background: white;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 30px;
-      margin-top: 20px;
-      width: 100%;
-      max-width: 400px;
+      padding: 20px;
       text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .result-container .icon {
+    .message-box .icon {
       font-size: 3rem;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
-    .result-container .success-icon { color: #2ecc71; }
-    .result-container .failure-icon { color: #e74c3c; }
-    .result-container button {
+    .success-icon { color: #2ecc71; }
+    .error-icon   { color: #e74c3c; }
+    .message-box button {
+      margin-top: 15px;
       padding: 10px 20px;
-      font-size: 1rem;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       background: #3498db;
       color: white;
+      font-size: 1rem;
     }
   </style>
 </head>
@@ -233,22 +227,22 @@
     </div>
   </div>
 
-  <!-- spinner overlay -->
-  <div class="spinner-overlay" id="spinner">
+  <!-- Spinner & Overlays -->
+  <div id="spinnerOverlay" class="overlay">
     <div class="spinner"></div>
   </div>
-
-  <!-- result messages -->
-  <div class="result-container" id="resultContainer">
-    <div id="successContainer">
+  <div id="successOverlay" class="overlay">
+    <div class="message-box">
       <div class="icon success-icon">✔️</div>
       <p>تمت العملية بنجاح</p>
       <button id="successOkBtn">OK</button>
     </div>
-    <div id="failureContainer">
-      <div class="icon failure-icon">❌</div>
+  </div>
+  <div id="errorOverlay" class="overlay">
+    <div class="message-box">
+      <div class="icon error-icon">❌</div>
       <p>فشلت العملية</p>
-      <button id="failureOkBtn">OK</button>
+      <button id="errorOkBtn">OK</button>
     </div>
   </div>
 
@@ -256,7 +250,6 @@
     // أسعار الاشتراك
     const monthlyPrice = 114;
     const yearlyPrice = 684;
-    // حساب الخصم السنوي
     const annualFull = monthlyPrice * 12;
     const discountAmount = annualFull - yearlyPrice;
     const discountPercent = Math.round((discountAmount / annualFull) * 100);
@@ -273,13 +266,6 @@
     const addEmailBtn = document.getElementById('addEmailBtn');
     const additionalContainer = document.getElementById('additionalEmails');
     const confirmBtn = document.getElementById('confirmBtn');
-    const spinner = document.getElementById('spinner');
-    const resultContainer = document.getElementById('resultContainer');
-    const successContainer = document.getElementById('successContainer');
-    const failureContainer = document.getElementById('failureContainer');
-    const successOkBtn = document.getElementById('successOkBtn');
-    const failureOkBtn = document.getElementById('failureOkBtn');
-    const formContainer = document.getElementById('formContainer');
 
     function selectPlan(plan) {
       currentPlan = plan;
@@ -294,9 +280,9 @@
     yearlyBtn.addEventListener('click', () => selectPlan('yearly'));
 
     function updateAddButton() {
-      const extraCount = additionalContainer.querySelectorAll('.email-group').length;
-      const total = extraCount + 1; // primary + extras
-      addEmailBtn.disabled = total >= maxEmails[currentPlan];
+      const countExtra = additionalContainer.querySelectorAll('.email-group').length;
+      const currentCount = countExtra + 1; // 1 for primary
+      addEmailBtn.disabled = currentCount >= maxEmails[currentPlan];
     }
 
     addEmailBtn.addEventListener('click', () => {
@@ -315,27 +301,6 @@
       updateAddButton();
     });
 
-    // عرض النتيجة بناءً على query parameters
-    window.addEventListener('load', () => {
-      const params = new URLSearchParams(window.location.search);
-      if (params.has('type') && params.get('type') === 'ChargeResponse') {
-        formContainer.style.display = 'none';
-        resultContainer.style.display = 'flex';
-        if (params.get('statusCode') === '200') {
-          successContainer.style.display = 'block';
-        } else {
-          failureContainer.style.display = 'block';
-        }
-      }
-    });
-
-    successOkBtn.addEventListener('click', () => {
-      window.location.href = 'https://invoicing.eta.gov.eg/documents';
-    });
-    failureOkBtn.addEventListener('click', () => {
-      window.location.href = 'https://mohasibfriend.github.io/extintion-subscribe/';
-    });
-
     confirmBtn.addEventListener('click', async () => {
       const phone = document.getElementById('phoneInput').value.trim();
       const primaryEmail = document.getElementById('primaryEmailInput').value.trim();
@@ -343,8 +308,10 @@
         alert('يرجى ملء رقم التلفون والايميل الرئيسي');
         return;
       }
-      spinner.style.display = 'flex';
+
+      // ارسال الايميل الرئيسي فقط
       const payload = { phone, plan: currentPlan, emails: [primaryEmail] };
+
       try {
         const res = await fetch(
           'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-extintion',
@@ -356,21 +323,53 @@
         );
         const envelope = await res.json();
         const data = envelope.body ? JSON.parse(envelope.body) : envelope;
+
         if (data.url) {
-          const url = new URL(data.url);
-          url.searchParams.set('customerMobile', phone);
-          window.location.href = url.toString();
+          window.location.href = data.url;
         } else {
           alert('لم يتم استلام رابط الدفع');
         }
       } catch (err) {
         console.error(err);
         alert('خطأ في اتصال الخادم');
-      } finally {
-        spinner.style.display = 'none';
       }
     });
 
+    // معالجة نتائج الدفع عند تحميل الصفحة
+    const spinnerOverlay = document.getElementById('spinnerOverlay');
+    const successOverlay = document.getElementById('successOverlay');
+    const errorOverlay = document.getElementById('errorOverlay');
+    const formContainer   = document.getElementById('formContainer');
+    const toggleButtonsEl = document.querySelector('.toggle-buttons');
+    const plansContainer  = document.querySelector('.plans');
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('type') === 'ChargeResponse') {
+        toggleButtonsEl.style.display = 'none';
+        plansContainer.style.display   = 'none';
+        formContainer.style.display    = 'none';
+        spinnerOverlay.style.display   = 'flex';
+
+        setTimeout(() => {
+          spinnerOverlay.style.display = 'none';
+          if (params.get('statusCode') === '200') {
+            successOverlay.style.display = 'flex';
+          } else {
+            errorOverlay.style.display = 'flex';
+          }
+        }, 1000);
+      }
+    });
+
+    document.getElementById('successOkBtn').addEventListener('click', () => {
+      window.location.href = 'https://invoicing.eta.gov.eg/documents';
+    });
+    document.getElementById('errorOkBtn').addEventListener('click', () => {
+      window.location.href = window.location.origin + window.location.pathname;
+    });
+
+    // تهيئة زر الإضافة
     updateAddButton();
   </script>
 </body>
