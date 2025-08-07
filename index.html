@@ -236,51 +236,42 @@
       updateAddButton();
     });
 
-    confirmBtn.addEventListener('click', async () => {
-      const phone = document.getElementById('phoneInput').value.trim();
-      const primaryEmail = document.getElementById('primaryEmailInput').value.trim();
-      const extraInputs = additionalContainer.querySelectorAll('input');
-      const emails = [
-        primaryEmail,
-        ...Array.from(extraInputs).map(i => i.value.trim())
-      ];
+confirmBtn.addEventListener('click', async () => {
+  const phone = document.getElementById('phoneInput').value.trim();
+  const primaryEmail = document.getElementById('primaryEmailInput').value.trim();
+  if (!phone || !primaryEmail) {
+    alert('يرجى ملء رقم التلفون والايميل الرئيسي');
+    return;
+  }
 
-      if (!phone || !primaryEmail) {
-        alert('يرجى ملء رقم التلفون والايميل الرئيسي');
-        return;
+  // ارسال الايميل الرئيسي فقط
+  const payload = { phone, plan: currentPlan, emails: [primaryEmail] };
+
+  try {
+    const res = await fetch(
+      'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-extintion',
+      {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify(payload)
       }
+    );
+    const envelope = await res.json();
+    const data = envelope.body ? JSON.parse(envelope.body) : envelope;
 
-      const payload = { phone, plan: currentPlan, emails };
-      try {
-        const res = await fetch(
-          'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-extintion',
-          {
-            method: 'POST',
-            headers: { 'Content-Type':'application/json' },
-            body: JSON.stringify(payload)
-          }
-        );
-
-        // 1) أولاً نقرأ الغلاف envelope
-        const envelope = await res.json();
-        console.log('full envelope:', envelope);
-
-        // 2) نحلّل body إذا كانت string
-        const data = envelope.body
-          ? JSON.parse(envelope.body)
-          : envelope;
-        console.log('parsed payload:', data);
-
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          alert('لم يتم استلام رابط الدفع');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('خطأ في اتصال الخادم');
-      }
-    });
+    if (data.url) {
+      // زي ما عرضنا قبل كده، لو حابب تلحق رقم الموبايل:
+      const url = new URL(data.url);
+      url.searchParams.set('customerMobile', phone);
+      window.location.href = url.toString();
+    } else {
+      alert('لم يتم استلام رابط الدفع');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('خطأ في اتصال الخادم');
+  }
+});
 
     // تهيئة زر الإضافة
     updateAddButton();
