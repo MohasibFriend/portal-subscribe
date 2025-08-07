@@ -267,14 +267,25 @@
     const additionalContainer = document.getElementById('additionalEmails');
     const confirmBtn = document.getElementById('confirmBtn');
 
-    function selectPlan(plan) {
-      currentPlan = plan;
-      monthlyBtn.classList.toggle('active', plan === 'monthly');
-      yearlyBtn.classList.toggle('active', plan === 'yearly');
-      monthlyCard.classList.toggle('active', plan === 'monthly');
-      yearlyCard.classList.toggle('active', plan === 'yearly');
-      updateAddButton();
+function selectPlan(plan) {
+  currentPlan = plan;
+  // تقليم الإيميلات الإضافية إذا تجاوزت الحد
+  const extras = additionalContainer.querySelectorAll('.email-group');
+  const allowedExtras = maxEmails[plan] - 1; // نخصم واحد للإيميل الرئيسي
+  if (extras.length > allowedExtras) {
+    for (let i = extras.length - 1; i >= allowedExtras; i--) {
+      extras[i].remove();
     }
+  }
+
+  // تحديث واجهة التبديل
+  monthlyBtn.classList.toggle('active', plan === 'monthly');
+  yearlyBtn.classList.toggle('active', plan === 'yearly');
+  monthlyCard.classList.toggle('active', plan === 'monthly');
+  yearlyCard.classList.toggle('active', plan === 'yearly');
+
+  updateAddButton();
+}
 
     monthlyBtn.addEventListener('click', () => selectPlan('monthly'));
     yearlyBtn.addEventListener('click', () => selectPlan('yearly'));
