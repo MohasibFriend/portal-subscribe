@@ -184,11 +184,12 @@
     // أسعار الاشتراك
     const monthlyPrice = 114;
     const yearlyPrice = 684;
-    // حساب الخصم
+    // حساب الخصم السنوي
     const annualFull = monthlyPrice * 12;
     const discountAmount = annualFull - yearlyPrice;
     const discountPercent = Math.round((discountAmount / annualFull) * 100);
-    document.getElementById('yearlySavings').textContent = `وفر ${discountAmount} ج.م (${discountPercent}%)`;
+    document.getElementById('yearlySavings').textContent =
+      `وفر ${discountAmount} ج.م (${discountPercent}%)`;
 
     let currentPlan = 'monthly';
     const maxEmails = { monthly: 10, yearly: 20 };
@@ -214,7 +215,8 @@
     yearlyBtn.addEventListener('click', () => selectPlan('yearly'));
 
     function updateAddButton() {
-      const currentCount = additionalContainer.querySelectorAll('.email-group').length + 1; // +1 for primary
+      const countExtra = additionalContainer.querySelectorAll('.email-group').length;
+      const currentCount = countExtra + 1; // 1 for primary
       addEmailBtn.disabled = currentCount >= maxEmails[currentPlan];
     }
 
@@ -238,11 +240,16 @@
       const phone = document.getElementById('phoneInput').value.trim();
       const primaryEmail = document.getElementById('primaryEmailInput').value.trim();
       const extraInputs = additionalContainer.querySelectorAll('input');
-      const emails = [primaryEmail, ...Array.from(extraInputs).map(i => i.value.trim())];
+      const emails = [
+        primaryEmail,
+        ...Array.from(extraInputs).map(i => i.value.trim())
+      ];
+
       if (!phone || !primaryEmail) {
         alert('يرجى ملء رقم التلفون والايميل الرئيسي');
         return;
       }
+
       const payload = { phone, plan: currentPlan, emails };
       try {
         const res = await fetch(
@@ -253,8 +260,17 @@
             body: JSON.stringify(payload)
           }
         );
-        const data = await res.json();
-        console.log(data)
+
+        // 1) أولاً نقرأ الغلاف envelope
+        const envelope = await res.json();
+        console.log('full envelope:', envelope);
+
+        // 2) نحلّل body إذا كانت string
+        const data = envelope.body
+          ? JSON.parse(envelope.body)
+          : envelope;
+        console.log('parsed payload:', data);
+
         if (data.url) {
           window.location.href = data.url;
         } else {
@@ -266,7 +282,7 @@
       }
     });
 
-    // تهيئة الزر
+    // تهيئة زر الإضافة
     updateAddButton();
   </script>
 </body>
