@@ -1,211 +1,307 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>صفحة الاشتراك</title>
   <style>
-    body {
+    /* ==== Variables & Base ==== */
+    :root {
+      --color-bg-start: #E0E7FF;
+      --color-bg-end: #FFFFFF;
+      --color-primary: #4F46E5;
+      --color-secondary: #10B981;
+      --color-accent: #6366F1;
+      --color-light: #bcbcf1;
+      --color-dark: #1F2937;
+      --radius: 12px;
+      --transition: 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
+      padding: 0;
+    }
+
+    body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f5f7fa;
-      color: #2c3e50;
+      background: linear-gradient(135deg, var(--color-bg-start), var(--color-bg-end));
+      color: var(--color-dark);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 40px 20px;
+      min-height: 100vh;
     }
-    .toggle-buttons {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .toggle-buttons button {
-      padding: 12px 24px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #ecf0f1;
-      transition: background 0.3s;
-    }
-    .toggle-buttons button.active {
-      background: #3498db;
-      color: white;
-    }
+
+    /* ==== Plan Cards ==== */
     .plans {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
       width: 100%;
-      max-width: 800px;
-      margin-bottom: 30px;
+      max-width: 900px;
+      margin-bottom: 40px;
     }
+
     .plan-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 20px;
+      background: #FFF;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px rgba(31, 41, 55, 0.05);
+      padding: 24px;
       text-align: center;
-      transition: transform 0.3s;
-      opacity: 0.6;
+      cursor: pointer;
+      transition: transform var(--transition),
+        box-shadow var(--transition),
+        opacity var(--transition),
+        border-color var(--transition);
+      opacity: 0.7;
+      border: 2px solid transparent;
     }
-    .plan-card.active {
-      transform: translateY(-5px);
+
+    .plan-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 24px rgba(31, 41, 55, 0.1);
       opacity: 1;
-      border: 2px solid #3498db;
     }
+
+    .plan-card.active {
+      opacity: 1;
+      border-color: var(--color-primary);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 28px rgba(31, 41, 55, 0.15);
+    }
+
     .plan-card h2 {
-      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 1.4rem;
+      color: var(--color-primary);
     }
+
     .plan-card .price {
-      font-size: 1.5rem;
-      margin: 10px 0;
+      font-size: 1.8rem;
+      margin: 8px 0;
       font-weight: bold;
+      color: var(--color-dark);
     }
+
     .plan-card ul {
       list-style: none;
       padding: 0;
+      margin: 16px 0;
       text-align: right;
+      color: var(--color-dark);
     }
+
     .plan-card ul li {
-      margin: 8px 0;
+      margin: 6px 0;
+      position: relative;
+      padding-left: 20px;
     }
-    .plan-card .savings {
-      margin-top: 12px;
+
+    .plan-card ul li::before {
+      content: '✔';
+      position: absolute;
+      left: 0;
+      color: var(--color-secondary);
       font-size: 0.9rem;
-      color: #e74c3c;
+      top: 0;
     }
+
+    .plan-card .savings {
+      font-size: 0.9rem;
+      color: var(--color-secondary);
+    }
+
+    /* ==== Form ==== */
     .form-container {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 20px;
+      background: #FFF;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px rgba(31, 41, 55, 0.05);
+      padding: 30px;
       width: 100%;
       max-width: 500px;
+      border: #000 solid 2px;
     }
+
     .input-group {
       display: flex;
       align-items: center;
-      margin-bottom: 12px;
-      gap: 10px;
+      margin-bottom: 16px;
+      gap: 12px;
     }
+
     .input-group label {
-      min-width: 80px;
+      min-width: 100px;
+      font-weight: 500;
+      color: var(--color-dark);
     }
+
     .input-group input {
       flex: 1;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      padding: 10px 12px;
+      border: 2px solid #D1D5DB;
+      border-radius: 8px;
       font-size: 1rem;
+      transition: border-color var(--transition);
     }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
     .input-group .remove-btn {
-      background: #e74c3c;
+      background: var(--color-secondary);
       border: none;
       border-radius: 6px;
       padding: 6px 10px;
       color: white;
       cursor: pointer;
+      transition: background var(--transition);
     }
+
+    .input-group .remove-btn:hover {
+      background: #059669;
+    }
+
     .form-actions {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 20px;
-    }
-    .form-actions button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    #addEmailBtn {
-      background: #2ecc71;
-      color: white;
-    }
-    #addEmailBtn:disabled {
-      background: #bdc3c7;
-      cursor: not-allowed;
-    }
-    #confirmBtn {
-      background: #3498db;
-      color: white;
+      margin-top: 24px;
     }
 
-    /* Overlay common */
+    .form-actions button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+    }
+
+    #addEmailBtn {
+      background: var(--color-secondary);
+      color: #FFF;
+      font-weight: bold;
+    }
+
+    #addEmailBtn:disabled {
+      background: #A3A3A3;
+      cursor: not-allowed;
+    }
+
+    #addEmailBtn:hover:not(:disabled) {
+      background: #059669;
+      transform: translateY(-2px);
+      font-weight: bold;
+    }
+
+    #confirmBtn {
+      background: var(--color-accent);
+      color: #FFF;
+      font-weight: bold;
+    }
+
+    #confirmBtn:hover {
+      background: #4F46E5;
+      transform: translateY(-2px);
+      font-weight: bold;
+    }
+
+    /* ==== Overlays & Spinner ==== */
     .overlay {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
       align-items: center;
       justify-content: center;
       z-index: 1000;
     }
-    /* Spinner */
+
     .spinner {
-      width: 60px; height: 60px;
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #3498db;
+      width: 70px;
+      height: 70px;
+      border: 8px solid #F3F4F6;
+      border-top: 8px solid var(--color-accent);
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
-    /* Message box */
+
     .message-box {
       background: white;
       border-radius: 12px;
-      padding: 20px;
+      padding: 60px;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 40%;
+      max-width: 161px;
     }
+
     .message-box .icon {
       font-size: 3rem;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
-    .success-icon { color: #2ecc71; }
-    .error-icon   { color: #e74c3c; }
+
+    .success-icon {
+      color: var(--color-secondary);
+    }
+
+    .error-icon {
+      color: #DC2626;
+    }
+
     .message-box button {
-      margin-top: 15px;
+      margin-top: 16px;
       padding: 10px 20px;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius);
       cursor: pointer;
-      background: #3498db;
-      color: white;
+      background: var(--color-primary);
+      color: #FFF;
       font-size: 1rem;
+      transition: background var(--transition);
+    }
+
+    .message-box button:hover {
+      background: #4338CA;
     }
   </style>
 </head>
-<body>
-  <div class="toggle-buttons">
-    <button id="monthlyBtn" class="active">اشتراك شهري</button>
-    <button id="yearlyBtn">اشتراك سنوي</button>
-  </div>
 
+<body>
+
+  <!-- ==== خط الأسطّ صار هنا ==== -->
   <div class="plans">
     <div id="monthlyPlan" class="plan-card active">
       <h2>اشتراك شهري</h2>
       <p class="price" id="monthlyPrice">114 ج.م / شهر</p>
       <ul>
-        <li>10 ايميلات هديه</li>
+        <li>10 ايميلات هدية</li>
         <li>تحميل سريع</li>
       </ul>
-      <p class="savings" id="monthlySavings">&nbsp;</p>
+      <p class="savings">&nbsp;</p>
     </div>
 
     <div id="yearlyPlan" class="plan-card">
       <h2>اشتراك سنوي</h2>
       <p class="price" id="yearlyPrice">684 ج.م / سنة</p>
       <ul>
-        <li>20 ايميل هديه</li>
-        <li>تحميل أسرع ورخيص</li>
+        <li>20 ايميل هدية</li>
+        <li>تحميل أسرع وأرخص</li>
       </ul>
       <p class="savings" id="yearlySavings"></p>
     </div>
@@ -213,11 +309,11 @@
 
   <div class="form-container" id="formContainer">
     <div class="input-group">
-      <label for="phoneInput">رقم التلفون</label>
+      <label for="phoneInput">رقم التلفون:</label>
       <input type="text" id="phoneInput" placeholder="أدخل رقم التلفون">
     </div>
     <div class="input-group">
-      <label for="primaryEmailInput">الايميل الرئيسي</label>
+      <label for="primaryEmailInput">الايميل الرئيسي:</label>
       <input type="email" id="primaryEmailInput" placeholder="أدخل الايميل الرئيسي">
     </div>
     <div id="additionalEmails"></div>
@@ -235,140 +331,130 @@
     <div class="message-box">
       <div class="icon success-icon">✔️</div>
       <p>تمت العملية بنجاح</p>
-      <button id="successOkBtn">OK</button>
+      <button id="successOkBtn">حسناً</button>
     </div>
   </div>
   <div id="errorOverlay" class="overlay">
     <div class="message-box">
       <div class="icon error-icon">❌</div>
       <p>فشلت العملية</p>
-      <button id="errorOkBtn">OK</button>
+      <button id="errorOkBtn">حسناً</button>
     </div>
   </div>
 
   <script>
-    // أسعار الاشتراك
+    // ==== حساب الخصم ====
     const monthlyPrice = 114;
     const yearlyPrice = 684;
     const annualFull = monthlyPrice * 12;
-    const discountAmount = annualFull - yearlyPrice;
-    const discountPercent = Math.round((discountAmount / annualFull) * 100);
+    const discount = annualFull - yearlyPrice;
+    const percentDisc = Math.round((discount / annualFull) * 100);
     document.getElementById('yearlySavings').textContent =
-      `وفر ${discountAmount} ج.م (${discountPercent}%)`;
+      `وفر ${discount} ج.م (${percentDisc}%)`;
 
+    // ==== إعداد الخطط والإيميلات ====
     let currentPlan = 'monthly';
     const maxEmails = { monthly: 10, yearly: 20 };
 
-    const monthlyBtn = document.getElementById('monthlyBtn');
-    const yearlyBtn = document.getElementById('yearlyBtn');
     const monthlyCard = document.getElementById('monthlyPlan');
     const yearlyCard = document.getElementById('yearlyPlan');
     const addEmailBtn = document.getElementById('addEmailBtn');
-    const additionalContainer = document.getElementById('additionalEmails');
+    const extrasContainer = document.getElementById('additionalEmails');
     const confirmBtn = document.getElementById('confirmBtn');
 
-function selectPlan(plan) {
-  currentPlan = plan;
-  // تقليم الإيميلات الإضافية إذا تجاوزت الحد
-  const extras = additionalContainer.querySelectorAll('.email-group');
-  const allowedExtras = maxEmails[plan] - 1; // نخصم واحد للإيميل الرئيسي
-  if (extras.length > allowedExtras) {
-    for (let i = extras.length - 1; i >= allowedExtras; i--) {
-      extras[i].remove();
+    function selectPlan(plan) {
+      currentPlan = plan;
+      // إزالة الإيميلات الزائدة
+      const groups = extrasContainer.querySelectorAll('.email-group');
+      const allowed = maxEmails[plan] - 1;
+      if (groups.length > allowed) {
+        for (let i = groups.length - 1; i >= allowed; i--) {
+          groups[i].remove();
+        }
+      }
+      // تحديث الكلاسات
+      monthlyCard.classList.toggle('active', plan === 'monthly');
+      yearlyCard.classList.toggle('active', plan === 'yearly');
+      updateAddButton();
     }
-  }
 
-  // تحديث واجهة التبديل
-  monthlyBtn.classList.toggle('active', plan === 'monthly');
-  yearlyBtn.classList.toggle('active', plan === 'yearly');
-  monthlyCard.classList.toggle('active', plan === 'monthly');
-  yearlyCard.classList.toggle('active', plan === 'yearly');
-
-  updateAddButton();
-}
-
-    monthlyBtn.addEventListener('click', () => selectPlan('monthly'));
-    yearlyBtn.addEventListener('click', () => selectPlan('yearly'));
+    // جعل الكارتين قابلتين للنقر
+    monthlyCard.addEventListener('click', () => selectPlan('monthly'));
+    yearlyCard.addEventListener('click', () => selectPlan('yearly'));
 
     function updateAddButton() {
-      const countExtra = additionalContainer.querySelectorAll('.email-group').length;
-      const currentCount = countExtra + 1; // 1 for primary
-      addEmailBtn.disabled = currentCount >= maxEmails[currentPlan];
+      const extrasCount = extrasContainer.querySelectorAll('.email-group').length;
+      addEmailBtn.disabled = (extrasCount + 1) >= maxEmails[currentPlan];
     }
 
     addEmailBtn.addEventListener('click', () => {
-      const group = document.createElement('div');
-      group.className = 'input-group email-group';
-      group.innerHTML = `
-        <label>ايميل اضافي</label>
+      const div = document.createElement('div');
+      div.className = 'input-group email-group';
+      div.innerHTML = `
+        <label>ايميل إضافي</label>
         <input type="email" placeholder="أدخل ايميل إضافي">
         <button class="remove-btn">-</button>
       `;
-      additionalContainer.appendChild(group);
-      group.querySelector('.remove-btn').addEventListener('click', () => {
-        group.remove();
+      extrasContainer.appendChild(div);
+      div.querySelector('.remove-btn').onclick = () => {
+        div.remove();
         updateAddButton();
-      });
+      };
       updateAddButton();
     });
 
-confirmBtn.addEventListener('click', async () => {
-  const phone = document.getElementById('phoneInput').value.trim();
-  const primaryEmail = document.getElementById('primaryEmailInput').value.trim();
-  if (!phone || !primaryEmail) {
-    alert('يرجى ملء رقم التلفون والايميل الرئيسي');
-    return;
-  }
-
-  // إظهار الاسبينر
-  spinnerOverlay.style.display = 'flex';
-
-  const payload = { phone, plan: currentPlan, emails: [primaryEmail] };
-
-  try {
-    const res = await fetch(
-      'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-extintion',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+    // إرسال البيانات وإدارة الواجهات
+    confirmBtn.addEventListener('click', async () => {
+      const phone = document.getElementById('phoneInput').value.trim();
+      const primaryEmail = document.getElementById('primaryEmailInput').value.trim();
+      if (!phone || !primaryEmail) {
+        alert('يرجى ملء رقم التلفون والايميل الرئيسي');
+        return;
       }
-    );
-    const envelope = await res.json();
-    const data = envelope.body ? JSON.parse(envelope.body) : envelope;
+      spinnerOverlay.style.display = 'flex';
+      const emails = [
+        primaryEmail,
+        ...[...extrasContainer.querySelectorAll('input')]
+          .map(i => i.value.trim())
+          .filter(e => e)
+      ];
+      try {
+        const res = await fetch(
+          'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-extintion',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, plan: currentPlan, emails })
+          }
+        );
+        const env = await res.json();
+        const data = env.body ? JSON.parse(env.body) : env;
+        spinnerOverlay.style.display = 'none';
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert('لم يتم استلام رابط الدفع');
+        }
+      } catch (e) {
+        console.error(e);
+        spinnerOverlay.style.display = 'none';
+        alert('خطأ في اتصال الخادم');
+      }
+    });
 
-    // إخفاء الاسبينر أول ما يردّ الرابط
-    spinnerOverlay.style.display = 'none';
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert('لم يتم استلام رابط الدفع');
-    }
-
-  } catch (err) {
-    console.error(err);
-    // إخفاء الاسبينر في حالة الخطأ
-    spinnerOverlay.style.display = 'none';
-    alert('خطأ في اتصال الخادم');
-  }
-});
-    // معالجة نتائج الدفع عند تحميل الصفحة
+    // التعامل مع نتيجة الدفع
     const spinnerOverlay = document.getElementById('spinnerOverlay');
     const successOverlay = document.getElementById('successOverlay');
     const errorOverlay = document.getElementById('errorOverlay');
-    const formContainer   = document.getElementById('formContainer');
-    const toggleButtonsEl = document.querySelector('.toggle-buttons');
-    const plansContainer  = document.querySelector('.plans');
+    const plansEl = document.querySelector('.plans');
+    const formEl = document.getElementById('formContainer');
 
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       if (params.get('type') === 'ChargeResponse') {
-        toggleButtonsEl.style.display = 'none';
-        plansContainer.style.display   = 'none';
-        formContainer.style.display    = 'none';
-        spinnerOverlay.style.display   = 'flex';
-
+        plansEl.style.display = 'none';
+        formEl.style.display = 'none';
+        spinnerOverlay.style.display = 'flex';
         setTimeout(() => {
           spinnerOverlay.style.display = 'none';
           if (params.get('statusCode') === '200') {
@@ -376,19 +462,20 @@ confirmBtn.addEventListener('click', async () => {
           } else {
             errorOverlay.style.display = 'flex';
           }
-        }, 1000);
+        }, 800);
       }
     });
 
-    document.getElementById('successOkBtn').addEventListener('click', () => {
+    document.getElementById('successOkBtn').onclick = () => {
       window.location.href = 'https://invoicing.eta.gov.eg/documents';
-    });
-    document.getElementById('errorOkBtn').addEventListener('click', () => {
+    };
+    document.getElementById('errorOkBtn').onclick = () => {
       window.location.href = window.location.origin + window.location.pathname;
-    });
+    };
 
-    // تهيئة زر الإضافة
+    // تفعيل البداية
     updateAddButton();
   </script>
 </body>
+
 </html>
