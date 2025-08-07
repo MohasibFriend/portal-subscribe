@@ -283,27 +283,23 @@
 </head>
 
 <body>
-
-  <!-- ==== خط الأسطّ صار هنا ==== -->
   <div class="plans">
     <div id="monthlyPlan" class="plan-card active">
       <h2>اشتراك شهري</h2>
-      <p class="price" id="monthlyPrice">114 ج.م / شهر</p>
+      <p class="price">114 ج.م / شهر</p>
       <ul>
         <li>10 ايميلات هدية</li>
         <li>تحميل سريع</li>
       </ul>
-      <p class="savings">&nbsp;</p>
     </div>
-
     <div id="yearlyPlan" class="plan-card">
       <h2>اشتراك سنوي</h2>
-      <p class="price" id="yearlyPrice">684 ج.م / سنة</p>
+      <p class="price">684 ج.م / سنة</p>
       <ul>
         <li>20 ايميل هدية</li>
         <li>تحميل أسرع وأرخص</li>
       </ul>
-      <p class="savings" id="yearlySavings"></p>
+      <p class="savings"></p>
     </div>
   </div>
 
@@ -323,7 +319,6 @@
     </div>
   </div>
 
-  <!-- Spinner & Overlays -->
   <div id="spinnerOverlay" class="overlay">
     <div class="spinner"></div>
   </div>
@@ -342,158 +337,149 @@
     </div>
   </div>
 
-<script>
-  // ==== حساب الخصم ====
-  const monthlyPrice = 114;
-  const yearlyPrice = 684;
-  const annualFull = monthlyPrice * 12;
-  const discount = annualFull - yearlyPrice;
-  const percentDisc = Math.round((discount / annualFull) * 100);
-  document.getElementById('yearlySavings').textContent =
-    `وفر ${discount} ج.م (${percentDisc}%)`;
+  <script>
+    // حساب الخصم السنوي
+    const monthlyPrice = 114;
+    const yearlyPrice = 684;
+    const annualFull = monthlyPrice * 12;
+    const discount = annualFull - yearlyPrice;
+    const percentDisc = Math.round((discount / annualFull) * 100);
+    document.querySelector('#yearlyPlan .savings').textContent =
+      `وفر ${discount} ج.م (${percentDisc}%)`;
 
-  // ==== إعداد الخطط والإيميلات ====
-  let currentPlan = 'monthly';
-  const maxEmails = { monthly: 10, yearly: 20 };
+    // إعداد الخطط
+    let currentPlan = 'monthly';
+    const maxEmails = { monthly: 10, yearly: 20 };
 
-  const monthlyCard = document.getElementById('monthlyPlan');
-  const yearlyCard = document.getElementById('yearlyPlan');
-  const addEmailBtn = document.getElementById('addEmailBtn');
-  const extrasContainer = document.getElementById('additionalEmails');
-  const confirmBtn = document.getElementById('confirmBtn');
+    const monthlyCard = document.getElementById('monthlyPlan');
+    const yearlyCard = document.getElementById('yearlyPlan');
+    const addEmailBtn = document.getElementById('addEmailBtn');
+    const extrasContainer = document.getElementById('additionalEmails');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const spinnerOverlay = document.getElementById('spinnerOverlay');
+    const successOverlay = document.getElementById('successOverlay');
+    const errorOverlay = document.getElementById('errorOverlay');
+    const plansEl = document.querySelector('.plans');
+    const formEl = document.getElementById('formContainer');
 
-  function selectPlan(plan) {
-    currentPlan = plan;
-    // إزالة الإيميلات الزائدة
-    const groups = extrasContainer.querySelectorAll('.email-group');
-    const allowed = maxEmails[plan] - 1; // واحد محجوز للبرايمري
-    if (groups.length > allowed) {
-      for (let i = groups.length - 1; i >= allowed; i--) {
-        groups[i].remove();
-      }
-    }
-    monthlyCard.classList.toggle('active', plan === 'monthly');
-    yearlyCard.classList.toggle('active', plan === 'yearly');
-    updateAddButton();
-  }
-
-  monthlyCard.addEventListener('click', () => selectPlan('monthly'));
-  yearlyCard.addEventListener('click', () => selectPlan('yearly'));
-
-  function updateAddButton() {
-    const extrasCount = extrasContainer.querySelectorAll('.email-group').length;
-    addEmailBtn.disabled = (extrasCount + 1) >= maxEmails[currentPlan];
-  }
-
-  addEmailBtn.addEventListener('click', () => {
-    const div = document.createElement('div');
-    div.className = 'input-group email-group';
-    div.innerHTML = `
-      <label>ايميل إضافي</label>
-      <input type="email" placeholder="أدخل ايميل إضافي">
-      <button class="remove-btn">-</button>
-    `;
-    extrasContainer.appendChild(div);
-    div.querySelector('.remove-btn').onclick = () => {
-      div.remove();
+    function selectPlan(plan) {
+      currentPlan = plan;
+      monthlyCard.classList.toggle('active', plan === 'monthly');
+      yearlyCard.classList.toggle('active', plan === 'yearly');
+      // إزالة زيادات لو عدوا الحد
+      const groups = extrasContainer.querySelectorAll('.email-group');
+      const allowed = maxEmails[plan] - 1;
+      groups.forEach((g, i) => { if (i >= allowed) g.remove(); });
       updateAddButton();
-    };
-    updateAddButton();
-  });
-
-  // ==== إرسال بيانات الدفع وإدارة الواجهات ====
-  confirmBtn.addEventListener('click', async () => {
-    const phone = document.getElementById('phoneInput').value.trim();
-    const primaryEmail = document.getElementById('primaryEmailInput').value.trim();
-    if (!phone || !primaryEmail) {
-      alert('يرجى ملء رقم التلفون والايميل الرئيسي');
-      return;
     }
-    spinnerOverlay.style.display = 'flex';
-    const emails = [
-      primaryEmail,
-      ...[...extrasContainer.querySelectorAll('input')]
-        .map(i => i.value.trim())
-        .filter(e => e)
-    ];
-    try {
-      const res = await fetch(
-        'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-extintion',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, plan: currentPlan, emails })
-        }
-      );
-      const env = await res.json();
-      const data = env.body ? JSON.parse(env.body) : env;
-      spinnerOverlay.style.display = 'none';
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert('لم يتم استلام رابط الدفع');
+    monthlyCard.addEventListener('click', () => selectPlan('monthly'));
+    yearlyCard.addEventListener('click', () => selectPlan('yearly'));
+
+    function updateAddButton() {
+      const extrasCount = extrasContainer.querySelectorAll('.email-group').length;
+      addEmailBtn.disabled = (extrasCount + 1) >= maxEmails[currentPlan];
+    }
+    addEmailBtn.addEventListener('click', () => {
+      const div = document.createElement('div');
+      div.className = 'input-group email-group';
+      div.innerHTML = `
+        <label>ايميل إضافي</label>
+        <input type="email" placeholder="أدخل ايميل إضافي">
+        <button class="remove-btn">-</button>
+      `;
+      extrasContainer.appendChild(div);
+      div.querySelector('.remove-btn').onclick = () => {
+        div.remove();
+        updateAddButton();
+      };
+      updateAddButton();
+    });
+
+    // عند الضغط على تأكيد → حفظ البايلود في sessionStorage ثم الدفع
+    confirmBtn.addEventListener('click', async () => {
+      const phone = document.getElementById('phoneInput').value.trim();
+      const primaryEmail = document.getElementById('primaryEmailInput').value.trim();
+      if (!phone || !primaryEmail) {
+        alert('يرجى ملء رقم التلفون والايميل الرئيسي');
+        return;
       }
-    } catch (e) {
-      console.error(e);
-      spinnerOverlay.style.display = 'none';
-      alert('خطأ في اتصال الخادم');
-    }
-  });
+      const extraEmails = [...extrasContainer.querySelectorAll('input')]
+        .map(i => i.value.trim()).filter(e => e);
+      const dayStatusVal = currentPlan === 'monthly' ? 30 : 360;
+      const payload = { primaryEmail, additionalEmails: extraEmails, dayStatus: dayStatusVal };
+      sessionStorage.setItem('subscribePayload', JSON.stringify(payload));
 
-  // ==== التعامل مع نتيجة الدفع وإرسال بيانات الأيام ====
-  const spinnerOverlay = document.getElementById('spinnerOverlay');
-  const successOverlay = document.getElementById('successOverlay');
-  const errorOverlay = document.getElementById('errorOverlay');
-  const plansEl = document.querySelector('.plans');
-  const formEl = document.getElementById('formContainer');
-
-  window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('type') === 'ChargeResponse') {
-      plansEl.style.display = 'none';
-      formEl.style.display = 'none';
       spinnerOverlay.style.display = 'flex';
-      setTimeout(() => {
+      try {
+        const res = await fetch(
+          'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-extintion',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, plan: currentPlan, emails: [primaryEmail, ...extraEmails] })
+          }
+        );
+        const env = await res.json();
+        const data = env.body ? JSON.parse(env.body) : env;
         spinnerOverlay.style.display = 'none';
-        if (params.get('statusCode') === '200') {
-          successOverlay.style.display = 'flex';
-
-          // === هنا: إرسال بيانات الاشتراك (dayStatus) بعد نجاح الدفع ===
-          const primary = document.getElementById('primaryEmailInput').value.trim();
-          const extraEmails = [...extrasContainer.querySelectorAll('.email-group input')]
-            .map(i => i.value.trim())
-            .filter(e => e);
-          const dayStatusVal = currentPlan === 'monthly' ? 30 : 360;
-          fetch(
-            'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-days',
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                primaryEmail: primary,
-                additionalEmails: extraEmails,
-                dayStatus: dayStatusVal
-              })
-            }
-          ).catch(err => console.error('subscribe-days error:', err));
-          // =====================================================
+        if (data.url) {
+          window.location.href = data.url;
         } else {
-          errorOverlay.style.display = 'flex';
+          alert('لم يتم استلام رابط الدفع');
         }
-      }, 800);
-    }
-  });
+      } catch (e) {
+        console.error(e);
+        spinnerOverlay.style.display = 'none';
+        alert('خطأ في اتصال الخادم');
+      }
+    });
 
-  document.getElementById('successOkBtn').onclick = () => {
-    window.location.href = 'https://invoicing.eta.gov.eg/documents';
-  };
-  document.getElementById('errorOkBtn').onclick = () => {
-    window.location.href = window.location.origin + window.location.pathname;
-  };
+    // بعد إعادة التحميل من صفحة الدفع
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('type') === 'ChargeResponse') {
+        plansEl.style.display = 'none';
+        formEl.style.display = 'none';
+        spinnerOverlay.style.display = 'flex';
+        setTimeout(() => {
+          spinnerOverlay.style.display = 'none';
+          if (params.get('statusCode') === '200') {
+            successOverlay.style.display = 'flex';
+            // إرسال بيانات الأيام
+            const stored = sessionStorage.getItem('subscribePayload');
+            if (stored) {
+              const payload = JSON.parse(stored);
+              console.log('📤 subscribe-day payload:', payload);
+              fetch(
+                'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-day',
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                }
+              )
+              .then(res => console.log('📥 status', res.status))
+              .catch(err => console.error('🚨 subscribe-day error:', err))
+              .finally(() => sessionStorage.removeItem('subscribePayload'));
+            } else {
+              console.error('🚨 لا توجد بيانات في sessionStorage');
+            }
+          } else {
+            errorOverlay.style.display = 'flex';
+          }
+        }, 800);
+      }
+    });
 
-  // تفعيل البداية
-  updateAddButton();
-</script>
+    document.getElementById('successOkBtn').onclick = () => {
+      window.location.href = 'https://invoicing.eta.gov.eg/documents';
+    };
+    document.getElementById('errorOkBtn').onclick = () => {
+      window.location.href = window.location.origin + window.location.pathname;
+    };
+
+    updateAddButton();
+  </script>
 </body>
 
 </html>
