@@ -301,40 +301,47 @@
       updateAddButton();
     });
 
-    confirmBtn.addEventListener('click', async () => {
-      const phone = document.getElementById('phoneInput').value.trim();
-      const primaryEmail = document.getElementById('primaryEmailInput').value.trim();
-      if (!phone || !primaryEmail) {
-        alert('يرجى ملء رقم التلفون والايميل الرئيسي');
-        return;
+confirmBtn.addEventListener('click', async () => {
+  const phone = document.getElementById('phoneInput').value.trim();
+  const primaryEmail = document.getElementById('primaryEmailInput').value.trim();
+  if (!phone || !primaryEmail) {
+    alert('يرجى ملء رقم التلفون والايميل الرئيسي');
+    return;
+  }
+
+  // إظهار الاسبينر
+  spinnerOverlay.style.display = 'flex';
+
+  const payload = { phone, plan: currentPlan, emails: [primaryEmail] };
+
+  try {
+    const res = await fetch(
+      'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-extintion',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       }
+    );
+    const envelope = await res.json();
+    const data = envelope.body ? JSON.parse(envelope.body) : envelope;
 
-      // ارسال الايميل الرئيسي فقط
-      const payload = { phone, plan: currentPlan, emails: [primaryEmail] };
+    // إخفاء الاسبينر أول ما يردّ الرابط
+    spinnerOverlay.style.display = 'none';
 
-      try {
-        const res = await fetch(
-          'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-extintion',
-          {
-            method: 'POST',
-            headers: { 'Content-Type':'application/json' },
-            body: JSON.stringify(payload)
-          }
-        );
-        const envelope = await res.json();
-        const data = envelope.body ? JSON.parse(envelope.body) : envelope;
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('لم يتم استلام رابط الدفع');
+    }
 
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          alert('لم يتم استلام رابط الدفع');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('خطأ في اتصال الخادم');
-      }
-    });
-
+  } catch (err) {
+    console.error(err);
+    // إخفاء الاسبينر في حالة الخطأ
+    spinnerOverlay.style.display = 'none';
+    alert('خطأ في اتصال الخادم');
+  }
+});
     // معالجة نتائج الدفع عند تحميل الصفحة
     const spinnerOverlay = document.getElementById('spinnerOverlay');
     const successOverlay = document.getElementById('successOverlay');
