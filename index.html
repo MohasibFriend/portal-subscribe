@@ -174,6 +174,14 @@
   </div>
 
   <script>
+    (() => {
+  const params = new URLSearchParams(window.location.search);
+  const emailFromUrl = params.get('email'); // مثال: ?email=citygrouprealestate123%40gmail.com
+  if (emailFromUrl) {
+    const input = document.getElementById('primaryEmailInput');
+    if (input) input.value = emailFromUrl; // URLSearchParams بيرجّعها مفكوكة (@ بدال %40)
+  }
+})();
     // حساب الخصم السنوي
     const monthlyPrice = 114, yearlyPrice = 684;
     const annualFull = monthlyPrice * 12,
