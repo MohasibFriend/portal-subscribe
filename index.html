@@ -148,7 +148,7 @@
         }
 
         .remove-btn:hover {
-            background: #059669;
+            background: #07407c;
         }
 
         .form-actions {
@@ -260,6 +260,21 @@
         .message-box button:hover {
             background: #4338CA;
         }
+        /* ==== Email hint ==== */
+.hint-wrap { position: relative; }
+#emailHint {
+  display: none;
+  position: absolute;
+  right: 0;            /* لأن الصفحة RTL */
+  top: 105%;
+  max-width: min(420px, 90vw);
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  background: #fff;
+  z-index: 10;
+}
+
     </style>
 </head>
 
@@ -289,10 +304,11 @@
             <label for="phoneInput">رقم التلفون:</label>
             <input type="text" id="phoneInput" placeholder="أدخل رقم التلفون">
         </div>
-        <div class="input-group">
-            <label for="primaryEmailInput">الايميل الرئيسي:</label>
-            <input type="email" id="primaryEmailInput" placeholder="أدخل الايميل الرئيسي">
-        </div>
+        <div class="input-group hint-wrap">
+  <label for="primaryEmailInput">الايميل الرئيسي:</label>
+  <input type="email" id="primaryEmailInput" placeholder="أدخل الايميل الرئيسي"autocomplete="off"autocapitalize="off"spellcheck="false"name="nope">
+  <img id="emailHint" src="hint.png" alt="نموذج يوضح الإيميل المطلوب" loading="lazy">
+</div>
         <div id="additionalEmails"></div>
         <div class="form-actions">
             <button id="addEmailBtn">إضافة ايميل</button>
@@ -463,6 +479,27 @@
         };
 
         updateAddButton();
+        // Toggle hint image when clicking the primary email input
+const emailInput = document.getElementById('primaryEmailInput');
+const emailHint  = document.getElementById('emailHint');
+
+emailInput.addEventListener('click', () => {
+  const isHidden = emailHint.style.display === '' || emailHint.style.display === 'none';
+  emailHint.style.display = isHidden ? 'block' : 'none';
+});
+
+// اختياري: اقفل الهنت لو المستخدم ضغط خارجها
+document.addEventListener('click', (e) => {
+  if (!emailHint) return;
+  const clickedInside = e.target === emailInput || emailHint.contains(e.target);
+  if (!clickedInside) emailHint.style.display = 'none';
+});
+
+// اختياري: اقفلها بزر ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') emailHint.style.display = 'none';
+});
+
     </script>
 </body>
 
