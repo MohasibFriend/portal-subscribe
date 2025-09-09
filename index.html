@@ -182,7 +182,23 @@
             background: #044478;
             transform: translateY(-2px);
         }
+        #extintion {
+            background: var(--color-accent);
+            color: #FFF;
+            font-weight: bold;
+            padding: 12px 24px;
+    font-size: 1rem;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+    margin-bottom: 15px;
+        }
 
+        #extintion:hover {
+            background: #3574ab;
+            transform: translateY(-2px);
+        }
         #confirmBtn {
             background: var(--color-accent);
             color: #FFF;
@@ -298,7 +314,9 @@
             <p class="savings"></p>
         </div>
     </div>
-
+<a href="https://chromewebstore.google.com/detail/mohasib-friend-%E2%80%94-eta-pdf/ilmabmgcomkkeolcoapmioemhjaldpik?hl=en-GB&utm_source=ext_sidebar" target="_blank" rel="noopener noreferrer">
+  <button id="extintion">لتحميل الاداه اضغط هنا</button>
+</a>
     <div class="form-container" id="formContainer">
         <div class="input-group">
             <label for="phoneInput">رقم التلفون:</label>
