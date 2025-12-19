@@ -478,7 +478,7 @@
                 spinnerOverlay.style.display = 'flex';
                 setTimeout(() => {
                     spinnerOverlay.style.display = 'none';
-                    if (params.get('orderStatus') === 'UNPAID') {
+                    if (params.get('orderStatus') === 'PAID') {
                         successOverlay.style.display = 'flex';
                         // جلب payload المعلن
                         const stored = sessionStorage.getItem('subscribePayload');
