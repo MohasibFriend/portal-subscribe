@@ -469,41 +469,66 @@
         };
 
         // عند العودة من بوابة الدفع
+        // عند العودة من بوابة الدفع
         window.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            // نعتمد على وجود statusCode
-            if (params.has('statusCode')) {
-                plansEl.style.display = 'none';
-                formEl.style.display = 'none';
-                spinnerOverlay.style.display = 'flex';
-                setTimeout(() => {
-                    spinnerOverlay.style.display = 'none';
-                    if (params.get('orderStatus') === 'PAID') {
-                        successOverlay.style.display = 'flex';
-                        // جلب payload المعلن
-                        const stored = sessionStorage.getItem('subscribePayload');
-                        if (stored) {
-                            const payload = JSON.parse(stored);
-                            console.log('📤 subscribe-day payload:', payload);
-                            fetch(
-                                'https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-days',
-                                {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify(payload)
-                                }
-                            )
-                                .then(res => console.log('📥 status', res.status))
-                                .catch(err => console.error('🚨 subscribe-day error:', err))
-                                .finally(() => sessionStorage.removeItem('subscribePayload'));
-                        } else {
-                            console.error('🚨 لا توجد بيانات في sessionStorage');
-                        }
-                    } else {
-                        errorOverlay.style.display = 'flex';
-                    }
-                }, 800);
+        const params = new URLSearchParams(window.location.search);
+
+        // نعتمد على وجود statusCode (زي ما عندك)
+        if (params.has('statusCode')) {
+            plansEl.style.display = 'none';
+            formEl.style.display = 'none';
+            spinnerOverlay.style.display = 'flex';
+
+            setTimeout(() => {
+            spinnerOverlay.style.display = 'none';
+
+            // =========================
+            // ✅ منطق التحقق الجديد
+            // 1) لو orderStatus موجود:
+            //    - PAID => نجاح
+            //    - غير كده (UNPAID أو أي قيمة) => خطأ
+            // 2) لو orderStatus مش موجود:
+            //    - استخدم statusCode:
+            //      200 => نجاح
+            //      غير كده => خطأ
+            // =========================
+            const hasOrderStatus = params.has('orderStatus');
+            const orderStatus = (params.get('orderStatus') || '').toUpperCase().trim();
+
+            // statusCode ممكن يرجع "200" كنص
+            const statusCodeRaw = params.get('statusCode');
+            const statusCode = Number(statusCodeRaw);
+
+            const isPaid = hasOrderStatus
+                ? (orderStatus === 'PAID')
+                : (statusCode === 200);
+
+            if (isPaid) {
+                successOverlay.style.display = 'flex';
+
+                // جلب payload المعلن
+                const stored = sessionStorage.getItem('subscribePayload');
+                if (stored) {
+                const payload = JSON.parse(stored);
+                console.log('📤 subscribe-day payload:', payload);
+
+                fetch('https://ul5i2a4nke.execute-api.us-east-1.amazonaws.com/prod/subscribe-days', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                    .then(res => console.log('📥 status', res.status))
+                    .catch(err => console.error('🚨 subscribe-day error:', err))
+                    .finally(() => sessionStorage.removeItem('subscribePayload'));
+                } else {
+                console.error('🚨 لا توجد بيانات في sessionStorage');
+                }
+            } else {
+                errorOverlay.style.display = 'flex';
             }
+
+            }, 800);
+        }
         });
 
         document.getElementById('successOkBtn').onclick = () => {
